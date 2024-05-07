@@ -6,6 +6,8 @@ import calendar
 import datetime
 from cpuinfo import get_cpu_info as cpu_info
 
+VERSION = "1.0.0v"
+
 # Configurations (Comming soon!)
 
 
@@ -71,6 +73,10 @@ now_month = datetime.datetime.now().month
 now_year = datetime.datetime.now().year
 calendar_month = calendar.month(now_year, now_month, 0, 0)
 
+date_today = (
+    f"{datetime.date.today()}, {datetime.datetime.now().strftime('%I:%M:%S %p')}"
+)
+
 print(
     f"""
 {user_plus_machine}
@@ -79,10 +85,13 @@ print(
 {Fore.RED}Uptime{Style.RESET_ALL}:  {get_uptime_info()}
 {Fore.RED}CPU{Style.RESET_ALL}:\t {cpuInfo}
 {Fore.RED}RAM{Style.RESET_ALL}:\t {Ram_info}                              
-{Fore.RED}Date{Style.RESET_ALL}:\t {datetime.date.today()}, {datetime.datetime.now().strftime('%I:%M:%S %p')}
+{Fore.RED}Date{Style.RESET_ALL}:\t {date_today}
+{Fore.RED}Xq{Style.RESET_ALL}:\t {VERSION}
 
 {calendar_month}                                                                                                                                        
 {Style.DIM}{''.join(get_color_items())}
 {Style.BRIGHT}{''.join(get_color_items())}
+
+
 """
 )

@@ -1,38 +1,97 @@
 import os
-import sys
-from colorama import Style, Fore, init
+import platform
+import psutil
+from colorama import Style, Fore
+import calendar
+import datetime
+from cpuinfo import get_cpu_info as cpu_info
+
+VERSION = "1.0.0v"
+
+# Configurations (Comming soon!)
 
 
-class Template:
-    def __init__(self):
-        pass
+# User Info
+name_machine = Fore.RED + str(os.getenv("COMPUTERNAME")).lower() + Style.RESET_ALL
+user_name = Fore.RED + os.getenv("USERNAME") + Style.RESET_ALL
+user_plus_machine = f"{name_machine}@{user_name}"
+cpuInfo = cpu_info()["brand_raw"]
 
 
-logo = f"""              
+# All Colors
+def get_color_items():
+    colors = [
+        Fore.BLACK,
+        Fore.RED,
+        Fore.GREEN,
+        Fore.YELLOW,
+        Fore.BLUE,
+        Fore.MAGENTA,
+        Fore.CYAN,
+        Fore.WHITE,
+    ]
+    color_items = [c + "██" + Style.RESET_ALL for c in colors]
+    return color_items
 
 
-          ;$&&&&&&$X                    
-        &&&&&&&&&&&&&&x                 
-       .&&&&&&&&&&&&&&   :              
-       $&&&&&&&&&&&&&&   &&&&X     ;&&& 
-       &&&&&&&&&&&&&&   &&&&&&&&&&&&&&X 
-      &&&&&&&&&&&&&&+  :&&&&&&&&&&&&&&  
-     ;&&&&&&&&&&&&&&   &&&&&&&&&&&&&&$  
-     $;         :&&X  :&&&&&&&&&&&&&&   
-          ++          &&&&&&&&&&&&&&x   
-    &&&&&&&&&&&&&+    $&&&&&&&&&&&&&    
-   x&&&&&&&&&&&&&&        .X&X;         
-   &&&&&&&&&&&&&&:  X&&;         .X     
-  X&&&&&&&&&&&&&&   &&&&&&&&&&&&&&;     
-  &&&&&&&&&&&&&&:  x&&&&&&&&&&&&&&      
- X&&&&&&&&&&&&&&   &&&&&&&&&&&&&&       
- &&&&x: .x&&&&&   &&&&&&&&&&&&&&$         {Style.DIM}{Fore.BLACK}██{Fore.RED}██{Fore.GREEN}██{Fore.YELLOW}██{Fore.BLUE}██{Fore.MAGENTA}██{Fore.CYAN}██{Fore.WHITE}██{Style.RESET_ALL}
-              x   &&&&&&&&&&&&&&.         {Fore.BLACK}██{Style.RESET_ALL}{Fore.RED}██{Style.RESET_ALL}{Fore.GREEN}██{Style.RESET_ALL}{Fore.YELLOW}██{Style.RESET_ALL}{Fore.BLUE}██{Style.RESET_ALL}{Fore.MAGENTA}██{Style.RESET_ALL}{Fore.CYAN}██{Style.RESET_ALL}{Fore.WHITE}██{Style.RESET_ALL}
-                 +&&&&&&&&&&&&&&          {Style.BRIGHT}{Fore.BLACK}██{Fore.RED}██{Fore.GREEN}██{Fore.YELLOW}██{Fore.BLUE}██{Fore.MAGENTA}██{Fore.CYAN}██{Fore.WHITE}██{Style.RESET_ALL}
-                    X&&&&&&&$
-                    
-                    
-                    """
+# OS Info
+os_info = (
+    platform.system()
+    + " "
+    + platform.release()
+    + f" ({platform.version()})"
+    + " "
+    + "x"
+    + platform.architecture()[0]
+)
 
-if __name__ == "__main__":
-    print(logo)
+# Ram Info
+ram_used = round(psutil.virtual_memory().used / (1024.0**3), 2)
+ram_total = round(psutil.virtual_memory().total / (1024.0**3), 2)
+Ram_info = f"{ram_used}/ {ram_total} GB"
+
+
+# Uptime
+def get_uptime_info():
+    boot_time_timestamp = psutil.boot_time()
+    boot_time_datetime = datetime.datetime.fromtimestamp(boot_time_timestamp)
+    now = datetime.datetime.now()
+    uptime = now - boot_time_datetime
+    hours, remainder = divmod(uptime.seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    if hours > 0:
+        uptime_str = f"{hours} hours, {minutes} minutes"
+    elif minutes > 0:
+        uptime_str = f"{minutes} minutes, {seconds} seconds"
+    else:
+        uptime_str = f"{seconds} seconds"
+    return uptime_str
+
+
+# Calendar
+now_month = datetime.datetime.now().month
+now_year = datetime.datetime.now().year
+calendar_month = calendar.month(now_year, now_month, 0, 0)
+
+date_today = (
+    f"{datetime.date.today()}, {datetime.datetime.now().strftime('%I:%M:%S %p')}"
+)
+
+print(
+    f"""
+{user_plus_machine}
+{"-" * 26}
+{Fore.RED}OS{Style.RESET_ALL}:\t {os_info}
+{Fore.RED}Uptime{Style.RESET_ALL}:  {get_uptime_info()}
+{Fore.RED}CPU{Style.RESET_ALL}:\t {cpuInfo}
+{Fore.RED}RAM{Style.RESET_ALL}:\t {Ram_info}                              
+{Fore.RED}Date{Style.RESET_ALL}:\t {date_today}
+{Fore.RED}Xq{Style.RESET_ALL}:\t {VERSION}
+
+{calendar_month}                                                                                                                                        
+{Style.DIM}{''.join(get_color_items())}
+{Style.BRIGHT}{''.join(get_color_items())}
+
+
+"""
+)
