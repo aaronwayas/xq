@@ -1,10 +1,1 @@
-{
-  "cpu_info": "AMD Ryzen 5 5600G with Radeon Graphics",
-  "settings": {
-    "color": "red",
-    "date": {
-      "format_hour": "12",
-      "format_date": "full"
-    }
-  }
-}
+{"cpu_info": "AMD Ryzen 5 5600G with Radeon Graphics", "settings": {"color": "red", "date": {"format_hour": "12", "format_date": "full"}, "ram": {"unit": "gb"}}}

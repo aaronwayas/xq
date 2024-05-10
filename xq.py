@@ -145,13 +145,16 @@ def get_ram_info() -> str:
     """
     Returns a string with RAM information.
     """
-    ram_used = round(psutil.virtual_memory().used / (1024.0**3), 2)
-    ram_total = round(psutil.virtual_memory().total / (1024.0**3), 2)
 
-    ram_percentage = psutil.virtual_memory().percent
+    with open(DATA_FILE, "r") as file:
+        data = json.load(file)["settings"]["ram"]
+        data = data
 
-    ram_info = f"{ram_used}/{ram_total} GB ({ram_percentage}%)"
-    return ram_info
+    if data["unit"].upper() == "GB":  # 8.4/16gb
+        return f"{round(psutil.virtual_memory().used / (1024.0**3), 2)}/{round(psutil.virtual_memory().total / (1024.0**3), 2)} GB ({psutil.virtual_memory().percent}%)"
+
+    elif data["unit"].upper() == "MB":  # 8.4/16gb
+        return f"{round(psutil.virtual_memory().used / (1024.0**2), 2)}/{round(psutil.virtual_memory().total / (1024.0**2), 2)} MB ({psutil.virtual_memory().percent}%)"
 
 
 def load_color():
@@ -255,11 +258,47 @@ def change_color(color):
         )
 
 
-def change_settings(setting):
+def change_settings(setting, value):
     """
     Function to change settings.
     """
-    # Por completar según los cambios que desees realizar en las configuraciones
+    try:
+        with open(DATA_FILE, "r") as file:
+            data = json.load(file)
+
+        if setting == "ram":
+            if value.lower() in ["mb", "gb"]:
+                data["settings"]["ram"]["unit"] = value.lower()
+                with open(DATA_FILE, "w") as file:
+                    json.dump(data, file)
+                print(f"RAM unit changed to '{value.lower()}'.")
+                exit()
+            else:
+                print("Invalid unit. Available units are: 'MB' or 'GB'.")
+                exit()
+
+        elif setting == "date":
+            format_hour = input("Enter the format for hour (12/24): ").strip().lower()
+            format_date = (
+                input("Enter the format for date (full/short): ").strip().lower()
+            )
+
+            if format_hour in ["12", "24"] and format_date in ["full", "short"]:
+                data["settings"]["date"]["format_hour"] = format_hour
+                data["settings"]["date"]["format_date"] = format_date
+                with open(DATA_FILE, "w") as file:
+                    json.dump(data, file)
+                print("Date format changed successfully.")
+                exit()
+            else:
+                print(
+                    "Invalid formats. Hour format should be '12' or '24', and date format should be 'full' or 'short'."
+                )
+                exit()
+    except FileNotFoundError:
+        print(
+            "Data file not found. Please run the script without options first to create the data file."
+        )
 
 
 # Configuración del analizador de argumentos de línea de comandos
@@ -279,6 +318,8 @@ parser.add_argument(
     "--settings",
     metavar="setting",
     help="Change the settings",
+    choices=["ram", "date"],
+    nargs="?",
     type=str,
 )
 
@@ -293,7 +334,11 @@ if args.color:
     change_color(args.color)
 
 if args.settings:
-    change_settings(args.settings)
+    if args.settings == "date":
+        change_settings(args.settings, None)  # We don't need value for date setting
+    else:
+        change_settings(args.settings, input("Enter the value: ").strip().lower())
+
 
 # Imprimiendo información del sistema
 
