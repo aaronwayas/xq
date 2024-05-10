@@ -38,12 +38,31 @@ def get_cpu_info() -> str:
             data = json.load(file)
             if "cpu_info" in data:
                 return data["cpu_info"]
-    except (FileNotFoundError, json.decoder.JSONDecodeError, KeyError):
-        pass
+    except (
+        FileNotFoundError,
+        json.decoder.JSONDecodeError,
+        KeyError,
+        TypeError,
+        AttributeError,
+    ) as err:
+        # Si no se puede cargar el archivo o no se encuentra la clave "cpu_info"
+        # se ignora y se vuelve a cargar la información
+        print(f"Warning: Error loading CPU info from {DATA_FILE}: {err}")
 
     cpu_info = cpuinfo()["brand_raw"]
-    with open(DATA_FILE, "w") as file:
-        json.dump({"cpu_info": cpu_info}, file)
+
+    try:
+        with open(DATA_FILE, "w") as file:
+            json.dump({"cpu_info": cpu_info}, file)
+    except (
+        FileNotFoundError,
+        json.decoder.JSONDecodeError,
+        TypeError,
+        AttributeError,
+    ) as err:
+        # Si no se puede guardar el archivo, se ignora
+        print(f"Warning: Error saving CPU info to {DATA_FILE}: {err}")
+
     return cpu_info
 
 
@@ -343,4 +362,16 @@ if args.settings:
 # Imprimiendo información del sistema
 
 if __name__ == "__main__" and not (args.delete or args.color):
+    if not os.path.exists(DATA_FILE) or os.stat(DATA_FILE).st_size == 0:
+        default_data = {
+            "cpu_info": get_cpu_info(),
+            "settings": {
+                "color": "blue",
+                "ram": {"unit": "GB"},
+                "date": {"format_hour": "24", "format_date": "full"},
+            },
+        }
+        with open(DATA_FILE, "w") as file:
+            json.dump(default_data, file)
+
     print(fetch_info())
