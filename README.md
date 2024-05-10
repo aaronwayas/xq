@@ -87,7 +87,7 @@ python xq.py -s ram
 <br>
 <summary><b>View Screenshots</b></summary <br>  
 
-<p align="left"><img src="image.png" alt="image.png" width="70%"/></p>
+<p align="left"><img src="img/image.png" alt="image.png" width="70%"/></p>
 
 </details>
 
